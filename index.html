@@ -390,33 +390,42 @@
     color: var(--txt); line-height: 1.5;
   }
 
-  /* Results tab */
+  /* Results tab — masonry/pinterest layout */
+  .testimonial-grid {
+    column-count: 1;
+    column-gap: 14px;
+  }
+  @media (min-width: 520px) { .testimonial-grid { column-count: 2; } }
+  @media (min-width: 900px) { .testimonial-grid { column-count: 3; } }
   .testimonial-card {
     background: rgba(13,6,16,0.7);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     border: 1px solid var(--border);
     border-radius: 14px;
-    padding: 14px;
-    margin-bottom: 16px;
+    padding: 10px;
+    margin: 0 0 14px;
     animation: fadeUp .4s ease both;
+    break-inside: avoid;
+    display: inline-block;
+    width: 100%;
   }
   .testimonial-card img {
     width: 100%; border-radius: 10px; display: block;
   }
   .testimonial-fallback {
-    padding: 24px 22px;
+    padding: 20px 18px;
     border-radius: 10px;
     background: rgba(58,26,44,0.4);
     border: 1px solid var(--border);
   }
   .testimonial-fallback .err {
-    font-size: 10px; font-weight: 700; color: var(--txtFaded);
-    letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 10px;
+    font-size: 9px; font-weight: 700; color: var(--txtFaded);
+    letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px;
   }
   .testimonial-fallback p {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 17px; font-style: italic; color: var(--txt); line-height: 1.6;
+    font-size: 15px; font-style: italic; color: var(--txt); line-height: 1.55;
   }
   .results-cta-wrap { text-align: center; margin-top: 32px; }
   .results-cta-lead {
@@ -650,7 +659,7 @@
   </main>
 
   <!-- RESULTS TAB -->
-  <main id="tab-results" class="tab-view tab-pad-tall" style="display:none;">
+  <main id="tab-results" class="tab-view tab-pad-tall" style="display:none; max-width:1100px; margin:0 auto;">
     <div style="text-align:center; margin-bottom:32px;">
       <div class="section-label">Real Women · Real Shifts</div>
       <div class="section-title">
@@ -659,7 +668,7 @@
       </div>
       <p class="section-blurb">Unedited messages from women inside the work.</p>
     </div>
-    <div id="testimonials"></div>
+    <div class="testimonial-grid" id="testimonials"></div>
     <div class="results-cta-wrap">
       <div class="results-cta-lead">This could be your story next.</div>
       <button class="cta-btn" data-goto="deeper" style="padding:16px 32px; font-size:13px;">See What's Inside →</button>
@@ -938,6 +947,11 @@ function switchTab(id) {
   });
   document.getElementById('hero').style.display = id === 'journal' ? '' : 'none';
   document.getElementById('progressStrip').classList.toggle('hidden', id !== 'journal');
+  // Widen container on Results tab so masonry has room; narrow on others for readability
+  const container = document.querySelector('.container');
+  if (container) {
+    container.style.maxWidth = (id === 'results') ? '1100px' : '680px';
+  }
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
