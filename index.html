@@ -124,24 +124,29 @@
   .hero { padding: 52px 24px 28px; text-align: center; }
   .hero-eyebrow {
     font-size: 11px; font-weight: 700; letter-spacing: 2.5px;
-    color: var(--mauveLt); text-transform: uppercase; margin-bottom: 14px;
-  }
-  .hero-sub {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 15px; font-style: italic;
-    color: var(--mauveLt); margin-bottom: 22px; letter-spacing: 0.5px;
+    color: var(--mauveLt); text-transform: uppercase; margin-bottom: 22px;
   }
   .hero-title {
     font-family: 'Cormorant Garamond', serif;
     font-weight: 700; color: var(--txt);
-    line-height: 1.15; margin-bottom: 18px;
-    letter-spacing: 0.3px;
-    font-size: 34px;
+    line-height: 1.05; margin-bottom: 22px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-size: 36px;
   }
-  @media (min-width: 420px) { .hero-title { font-size: 38px; } }
-  @media (min-width: 520px) { .hero-title { font-size: 44px; } }
-  @media (min-width: 680px) { .hero-title { font-size: 52px; } }
-  .hero-title .mauve { color: var(--mauveLt); }
+  @media (min-width: 420px) { .hero-title { font-size: 42px; } }
+  @media (min-width: 520px) { .hero-title { font-size: 50px; } }
+  @media (min-width: 680px) { .hero-title { font-size: 58px; } }
+  .hero-subtitle {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic; font-weight: 400;
+    color: var(--mauveLt);
+    line-height: 1.35; margin-bottom: 26px;
+    letter-spacing: 0.3px;
+    font-size: 22px;
+  }
+  @media (min-width: 520px) { .hero-subtitle { font-size: 26px; } }
+  @media (min-width: 680px) { .hero-subtitle { font-size: 30px; } }
   .hero-blurb {
     font-size: 15px; color: var(--txtMuted);
     line-height: 1.7; max-width: 480px; margin: 0 auto;
@@ -622,12 +627,11 @@
   <!-- HERO (journal tab only) -->
   <section id="hero" class="hero">
     <div class="hero-eyebrow">Badass Alchemy · Interactive Journal</div>
-    <div class="hero-sub">The Rich Girl Identity Rewire</div>
-    <h1 class="hero-title">
-      Ten Subconscious Shifts<br>
-      To Become The Woman<br>
-      <span class="mauve">Abundance Flows To.</span>
-    </h1>
+    <h1 class="hero-title">Your Rich Girl<br>Identity Rewire</h1>
+    <div class="hero-subtitle">
+      10 subconscious shifts to become<br>
+      the woman abundance flows to.
+    </div>
     <p class="hero-blurb">
       Money. Opportunities. The right rooms. The right people.<br>
       They flow to a specific frequency. Here's how to become it.
