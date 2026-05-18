@@ -477,6 +477,26 @@
   /* Active tab pill always has light text — it sits on the dark mauve gradient */
   .tab-pill.active { color: #F5EAF0 !important; }
 
+  /* Stacked buttons at end-of-journal */
+  .end-cta-buttons {
+    display: flex; flex-direction: column;
+    gap: 12px; align-items: center;
+  }
+  .cta-btn-outline {
+    background: transparent !important;
+    color: var(--mauveLt) !important;
+    border: 1.5px solid var(--mauveLt) !important;
+    box-shadow: none !important;
+  }
+  .cta-btn-outline:hover {
+    background: var(--affBg) !important;
+    color: var(--mauveLt) !important;
+    box-shadow: 0 4px 14px var(--shadow) !important;
+  }
+  .cta-btn-outline:disabled {
+    opacity: 0.6; cursor: wait;
+  }
+
   /* Affirmations tab */
   .aff-row {
     background: var(--cardBg);
@@ -773,7 +793,13 @@
       <div class="cta-inner">
         <div class="cta-eyebrow">You did the reading.</div>
         <div class="cta-head">Now it's time to <em>become her.</em></div>
-        <button class="cta-btn" data-goto="deeper">Start My Identity Shift Now →</button>
+        <div class="end-cta-buttons">
+          <button class="cta-btn" data-goto="deeper">Start My Identity Shift Now →</button>
+          <button class="cta-btn cta-btn-outline" id="downloadPdfBtn">
+            <span class="dl-default">↓ Download My Results (PDF)</span>
+            <span class="dl-loading" style="display:none;">Generating…</span>
+          </button>
+        </div>
       </div>
     </div>
   </main>
@@ -908,14 +934,14 @@ const TESTIMONIAL_FALLBACKS = [
 const INCLUDED_TOOLS = [
   { mark:"I",   name:"The Rich Girl Reset", desc:"A free 5-day subconscious audio activation series designed to rewire your mind for wealth, receiving, abundance, and emotional safety around success." },
   { mark:"II",  name:"EFT Rewiring Vault", desc:"Tap your way out of self-sabotage, fear, inconsistency, scarcity, and emotional blocks so you can embody your next-level identity." },
-  { mark:"III", name:"Money Block Rewires", desc:"Identify and release the subconscious patterns keeping you stuck in cycles of lack, undercharging, overgiving, and financial survival mode." },
-  { mark:"IV",  name:"Identity Shift Journaling Prompts", desc:"Deep subconscious prompts to help you uncover hidden beliefs, emotional patterns, and identity loops that keep recreating the same reality." },
-  { mark:"V",   name:"The Shadow to Sovereign Oracle Experience", desc:"Daily guidance, shadow work insights, and emotional pattern breakdowns designed to help you turn your pain, triggers, and fears into personal power." },
-  { mark:"VI",  name:"The Oracle Shadow Work Tool", desc:"Your AI-powered subconscious reflection tool — helping you uncover blind spots, emotional patterns, and the hidden identity keeping you stuck." },
+  { mark:"III", name:"Identity Shift Journaling Prompts", desc:"Deep subconscious prompts to help you uncover hidden beliefs, emotional patterns, and identity loops that keep recreating the same reality." },
+  { mark:"IV",  name:"The Shadow to Sovereign Oracle Experience", desc:"Daily guidance, shadow work insights, and emotional pattern breakdowns designed to help you turn your pain, triggers, and fears into personal power." },
+  { mark:"V",   name:"The Oracle Shadow Work Tool", desc:"Your AI-powered subconscious reflection tool — helping you uncover blind spots, emotional patterns, and the hidden identity keeping you stuck." },
 ];
 const UPGRADES = [
-  { mark:"✦", name:"The Identity Detox", desc:"A powerful 3-day subconscious reset designed to help you break emotional attachment to struggle, scarcity, and survival mode." },
-  { mark:"✧", name:"Quantum Queen", desc:"Danielle's signature 90-day transformation experience for the woman ready to fully embody her wealthy, magnetic, emotionally regulated next identity." },
+  { mark:"✦", name:"Money Block Rewires", desc:"Identify and release the subconscious patterns keeping you stuck in cycles of lack, undercharging, overgiving, and financial survival mode." },
+  { mark:"✧", name:"The Identity Detox", desc:"A powerful 3-day subconscious reset designed to help you break emotional attachment to struggle, scarcity, and survival mode." },
+  { mark:"❖", name:"Quantum Queen", desc:"Danielle's signature 90-day transformation experience for the woman ready to fully embody her wealthy, magnetic, emotionally regulated next identity." },
 ];
 
 // ── THEME MANAGEMENT ─────────────────────────────────────────
@@ -941,6 +967,251 @@ function toggleTheme() {
   const next = isLight ? "dark" : "light";
   applyTheme(next);
   try { localStorage.setItem(THEME_KEY, next); } catch(e) { /* ignore */ }
+}
+
+// ── PDF DOWNLOAD ─────────────────────────────────────────────
+let jsPdfLoadPromise = null;
+
+function loadJsPDF() {
+  if (window.jspdf) return Promise.resolve(window.jspdf);
+  if (jsPdfLoadPromise) return jsPdfLoadPromise;
+  jsPdfLoadPromise = new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    script.onload = () => resolve(window.jspdf);
+    script.onerror = () => reject(new Error('Failed to load PDF library'));
+    document.head.appendChild(script);
+  });
+  return jsPdfLoadPromise;
+}
+
+function todayString() {
+  const d = new Date();
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  return months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+}
+
+async function generatePdf() {
+  const btn = document.getElementById('downloadPdfBtn');
+  const defaultLabel = btn.querySelector('.dl-default');
+  const loadingLabel = btn.querySelector('.dl-loading');
+
+  btn.disabled = true;
+  defaultLabel.style.display = 'none';
+  loadingLabel.style.display = 'inline';
+
+  try {
+    const lib = await loadJsPDF();
+    const { jsPDF } = lib;
+    const doc = new jsPDF({ unit: 'pt', format: 'letter' });
+
+    // Page geometry
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const margin = 56;
+    const contentW = pageW - (margin * 2);
+    let y = margin;
+
+    // Colors (RGB)
+    const C_TXT = [42, 24, 32];     // deep plum text
+    const C_MAUVE = [138, 88, 116]; // brand mauve
+    const C_FADED = [138, 106, 124];
+    const C_RULE = [212, 195, 205];
+
+    // Helper: add page if we're about to overflow
+    const ensureSpace = (needed) => {
+      if (y + needed > pageH - margin) {
+        doc.addPage();
+        y = margin;
+      }
+    };
+
+    // Helper: draw text with wrapping, returns new y
+    const drawText = (text, opts) => {
+      const o = opts || {};
+      doc.setFont(o.font || 'times', o.style || 'normal');
+      doc.setFontSize(o.size || 11);
+      doc.setTextColor(...(o.color || C_TXT));
+      const lines = doc.splitTextToSize(text, contentW);
+      const lineHeight = (o.size || 11) * 1.45;
+      lines.forEach(line => {
+        ensureSpace(lineHeight);
+        doc.text(line, margin, y);
+        y += lineHeight;
+      });
+      if (o.afterGap) y += o.afterGap;
+    };
+
+    // === COVER ===
+    y = pageH * 0.35;
+    doc.setFont('times', 'italic');
+    doc.setFontSize(11);
+    doc.setTextColor(...C_MAUVE);
+    doc.text('BADASS ALCHEMY', pageW / 2, y, { align: 'center' });
+    y += 32;
+
+    doc.setFont('times', 'bold');
+    doc.setFontSize(28);
+    doc.setTextColor(...C_TXT);
+    doc.text('Your Rich Girl', pageW / 2, y, { align: 'center' });
+    y += 34;
+    doc.text('Identity Rewire', pageW / 2, y, { align: 'center' });
+    y += 30;
+
+    doc.setFont('times', 'italic');
+    doc.setFontSize(14);
+    doc.setTextColor(...C_MAUVE);
+    doc.text('10 subconscious shifts to become', pageW / 2, y, { align: 'center' });
+    y += 20;
+    doc.text('the woman abundance flows to.', pageW / 2, y, { align: 'center' });
+    y += 60;
+
+    // Decorative rule
+    doc.setDrawColor(...C_RULE);
+    doc.setLineWidth(0.5);
+    doc.line(pageW / 2 - 40, y, pageW / 2 + 40, y);
+    y += 28;
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(...C_FADED);
+    doc.text('Completed ' + todayString(), pageW / 2, y, { align: 'center' });
+    y += 16;
+    doc.text(state.completed.length + ' of ' + SESSIONS.length + ' sessions complete', pageW / 2, y, { align: 'center' });
+
+    // === SESSIONS ===
+    doc.addPage();
+    y = margin;
+
+    SESSIONS.forEach((session, idx) => {
+      const responses = state.responses[idx] || [];
+      const isDone = state.completed.indexOf(idx) !== -1;
+
+      ensureSpace(80);
+
+      // Session number + title
+      doc.setFont('times', 'italic');
+      doc.setFontSize(11);
+      doc.setTextColor(...C_FADED);
+      doc.text(session.n, margin, y);
+
+      doc.setFont('times', 'bold');
+      doc.setFontSize(18);
+      doc.setTextColor(...C_TXT);
+      const titleLines = doc.splitTextToSize(session.title, contentW - 30);
+      titleLines.forEach((line, i) => {
+        doc.text(line, margin + 30, y + (i * 22));
+      });
+      y += titleLines.length * 22 + 6;
+
+      // Hook
+      doc.setFont('times', 'italic');
+      doc.setFontSize(11);
+      doc.setTextColor(...C_MAUVE);
+      const hookLines = doc.splitTextToSize(session.hook, contentW);
+      hookLines.forEach(line => {
+        ensureSpace(16);
+        doc.text(line, margin, y);
+        y += 16;
+      });
+      y += 12;
+
+      // Decorative rule
+      doc.setDrawColor(...C_RULE);
+      doc.setLineWidth(0.4);
+      doc.line(margin, y, margin + 60, y);
+      y += 18;
+
+      // The Practice
+      drawText('THE PRACTICE', { font: 'helvetica', style: 'bold', size: 9, color: C_MAUVE, afterGap: 4 });
+      drawText(session.practice, { font: 'helvetica', style: 'normal', size: 11, color: C_TXT, afterGap: 16 });
+
+      // Affirmation
+      drawText('AFFIRMATION', { font: 'helvetica', style: 'bold', size: 9, color: C_MAUVE, afterGap: 4 });
+      drawText('"' + session.aff + '"', { font: 'times', style: 'italic', size: 13, color: C_TXT, afterGap: 18 });
+
+      // Journal Prompts + Responses
+      drawText('YOUR REFLECTIONS', { font: 'helvetica', style: 'bold', size: 9, color: C_MAUVE, afterGap: 8 });
+
+      session.prompts.forEach((prompt, pi) => {
+        drawText('✦ ' + prompt, { font: 'times', style: 'italic', size: 11, color: C_MAUVE, afterGap: 4 });
+        const response = (responses[pi] || '').trim();
+        if (response) {
+          drawText(response, { font: 'helvetica', style: 'normal', size: 11, color: C_TXT, afterGap: 14 });
+        } else {
+          drawText('(Left blank)', { font: 'helvetica', style: 'italic', size: 10, color: C_FADED, afterGap: 14 });
+        }
+      });
+
+      // Status
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(...(isDone ? C_MAUVE : C_FADED));
+      doc.text(isDone ? '✓ SESSION COMPLETE' : '○ INCOMPLETE', margin, y);
+      y += 32;
+
+      // Section break (skip on last)
+      if (idx < SESSIONS.length - 1) {
+        ensureSpace(24);
+        doc.setDrawColor(...C_RULE);
+        doc.setLineWidth(0.3);
+        doc.line(margin, y, pageW - margin, y);
+        y += 24;
+      }
+    });
+
+    // === CLOSING PAGE ===
+    doc.addPage();
+    y = pageH * 0.38;
+
+    doc.setFont('times', 'italic');
+    doc.setFontSize(13);
+    doc.setTextColor(...C_MAUVE);
+    doc.text('You are the alchemy.', pageW / 2, y, { align: 'center' });
+    y += 40;
+
+    doc.setFont('times', 'bold');
+    doc.setFontSize(22);
+    doc.setTextColor(...C_TXT);
+    doc.text("Don't wait to become her.", pageW / 2, y, { align: 'center' });
+    y += 30;
+    doc.text('Choose her now.', pageW / 2, y, { align: 'center' });
+    y += 56;
+
+    doc.setDrawColor(...C_RULE);
+    doc.setLineWidth(0.5);
+    doc.line(pageW / 2 - 40, y, pageW / 2 + 40, y);
+    y += 32;
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(...C_FADED);
+    doc.text('Continue the work inside The Baddie Society', pageW / 2, y, { align: 'center' });
+    y += 14;
+    doc.setTextColor(...C_MAUVE);
+    doc.text('skool.com/baddie-society', pageW / 2, y, { align: 'center' });
+
+    // Footer on every page
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let p = 1; p <= pageCount; p++) {
+      doc.setPage(p);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(...C_FADED);
+      doc.text('Your Rich Girl Identity Rewire · Badass Alchemy', margin, pageH - 24);
+      doc.text(p + ' / ' + pageCount, pageW - margin, pageH - 24, { align: 'right' });
+    }
+
+    // Save
+    doc.save('rich-girl-identity-rewire-' + new Date().toISOString().slice(0, 10) + '.pdf');
+  } catch (err) {
+    alert("Couldn't generate the PDF. Please check your connection and try again.");
+    console.error(err);
+  } finally {
+    btn.disabled = false;
+    defaultLabel.style.display = 'inline';
+    loadingLabel.style.display = 'none';
+  }
 }
 
 // ── STATE ────────────────────────────────────────────────────
@@ -1059,10 +1330,28 @@ function renderTestimonials() {
   const container = document.getElementById('testimonials');
   container.innerHTML = TESTIMONIAL_IMAGES.map((file, i) => `
     <div class="testimonial-card" style="animation-delay:${i*0.06}s">
-      <img src="${TESTIMONIAL_BASE}/${file}" alt="Testimonial ${i+1}" loading="lazy"
-           onerror="this.outerHTML='<div class=\\'testimonial-fallback\\'><div class=\\'err\\'>Upload image to display</div><p>${esc(TESTIMONIAL_FALLBACKS[i]).replace(/'/g, '&#39;')}</p></div>';">
+      <img src="${TESTIMONIAL_BASE}/${file}" alt="Testimonial ${i+1}" loading="lazy" data-idx="${i}">
     </div>
   `).join('');
+
+  // Attach error handlers after render — avoids inline onerror string-escaping issues
+  container.querySelectorAll('img[data-idx]').forEach(img => {
+    img.addEventListener('error', function() {
+      const idx = parseInt(this.dataset.idx, 10);
+      const parent = this.parentNode;
+      if (!parent) return;
+      const fallback = document.createElement('div');
+      fallback.className = 'testimonial-fallback';
+      const errLabel = document.createElement('div');
+      errLabel.className = 'err';
+      errLabel.textContent = 'Upload image to display';
+      const quote = document.createElement('p');
+      quote.textContent = TESTIMONIAL_FALLBACKS[idx] || '';
+      fallback.appendChild(errLabel);
+      fallback.appendChild(quote);
+      parent.replaceChild(fallback, this);
+    });
+  });
 }
 
 // ── RENDER: TOOLS / UPGRADES ─────────────────────────────────
@@ -1184,6 +1473,7 @@ renderTools();
 updateProgress();
 
 document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+document.getElementById('downloadPdfBtn').addEventListener('click', generatePdf);
 
 </script>
 </body>
