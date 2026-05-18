@@ -477,6 +477,22 @@
   /* Active tab pill always has light text — it sits on the dark mauve gradient */
   .tab-pill.active { color: #F5EAF0 !important; }
 
+  /* Always-visible "I Want More" CTA at bottom of journal */
+  .want-more-cta {
+    text-align: center;
+    padding: 40px 20px 8px;
+    margin-top: 8px;
+    animation: fadeUp .6s ease both;
+  }
+  .want-more-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    font-style: italic;
+    color: var(--mauveLt);
+    line-height: 1.4;
+    margin-bottom: 18px;
+  }
+
   /* Stacked buttons at end-of-journal */
   .end-cta-buttons {
     display: flex; flex-direction: column;
@@ -788,6 +804,13 @@
     <div class="section-label faded">10 Journal Sessions · Complete Each Practice</div>
     <div class="section-divider"></div>
     <div id="sessions"></div>
+
+    <!-- Always-visible "I Want More" CTA - shows regardless of completion -->
+    <div class="want-more-cta">
+      <div class="want-more-text">Curious what comes after the journal?</div>
+      <button class="cta-btn cta-btn-outline" data-goto="deeper">I Want More →</button>
+    </div>
+
     <div class="journal-end-cta" id="endCta">
       <div class="cta-stars"></div>
       <div class="cta-inner">
@@ -826,7 +849,7 @@
     <div class="testimonial-grid" id="testimonials"></div>
     <div class="results-cta-wrap">
       <div class="results-cta-lead">This could be your story next.</div>
-      <button class="cta-btn" data-goto="deeper" style="padding:16px 32px; font-size:13px;">See What's Inside →</button>
+      <a class="cta-btn" href="https://www.skool.com/baddie-society-6535/about" target="_blank" rel="noopener noreferrer" style="padding:16px 32px; font-size:13px;">See What's Inside →</a>
     </div>
   </main>
 
@@ -865,7 +888,7 @@
         <div class="cta-eyebrow" style="font-size:24px; margin-bottom:10px;">She's already inside you.</div>
         <div class="head">Stop waiting for permission<br>to become <em>her.</em></div>
         <div class="blurb">Cancel anytime. Built for the woman who is done waiting.</div>
-        <a class="cta-btn" href="https://www.skool.com/baddie-society" target="_blank" rel="noopener noreferrer">Start My Identity Shift Now →</a>
+        <a class="cta-btn" href="https://www.skool.com/baddie-society-6535/about" target="_blank" rel="noopener noreferrer">Start My Identity Shift Now →</a>
       </div>
     </div>
   </main>
@@ -881,7 +904,7 @@
 'use strict';
 
 // ── CONFIG ───────────────────────────────────────────────────
-const SKOOL_URL = "https://www.skool.com/baddie-society";
+const SKOOL_URL = "https://www.skool.com/baddie-society-6535/about";
 const TESTIMONIAL_BASE = "https://raw.githubusercontent.com/badassalchemy/imageassets/main";
 const STORAGE_KEY = "rgir_v1";
 const SHOW_MICRO_WINS = true;
@@ -1189,7 +1212,7 @@ async function generatePdf() {
     doc.text('Continue the work inside The Baddie Society', pageW / 2, y, { align: 'center' });
     y += 14;
     doc.setTextColor(...C_MAUVE);
-    doc.text('skool.com/baddie-society', pageW / 2, y, { align: 'center' });
+    doc.text('skool.com/baddie-society-6535', pageW / 2, y, { align: 'center' });
 
     // Footer on every page
     const pageCount = doc.internal.getNumberOfPages();
