@@ -9,7 +9,19 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,700;1,400;1,700&family=Playfair+Display:wght@400;500;600;700&family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
 
+<script>
+  // Apply theme before first paint to prevent flash
+  (function() {
+    try {
+      if (localStorage.getItem('rgir_theme') === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    } catch(e) {}
+  })();
+</script>
+
 <style>
+  /* DARK THEME (default) */
   :root {
     --bg: #0D0610;
     --bgMid: #180B1E;
@@ -29,14 +41,63 @@
     --gradMauve: linear-gradient(135deg, #5A2D48 0%, #8A5874 100%);
     --gradDeep: linear-gradient(160deg, #0D0618 0%, #3A1A2C 50%, #5A2D48 100%);
     --stars: radial-gradient(1px 1px at 20% 30%,rgba(245,234,240,0.4),transparent),radial-gradient(1px 1px at 60% 15%,rgba(245,234,240,0.3),transparent),radial-gradient(1.5px 1.5px at 80% 60%,rgba(245,234,240,0.35),transparent),radial-gradient(1px 1px at 40% 80%,rgba(245,234,240,0.25),transparent),radial-gradient(1px 1px at 10% 70%,rgba(245,234,240,0.3),transparent),radial-gradient(1.5px 1.5px at 90% 25%,rgba(245,234,240,0.4),transparent);
+    --bgImageOpacity: 1;
+    --overlayGradient: linear-gradient(180deg, rgba(13,6,16,0.68) 0%, rgba(58,26,44,0.62) 50%, rgba(13,6,16,0.72) 100%);
+    --navBg: rgba(13,6,16,0.92);
+    --cardBg: rgba(13,6,16,0.7);
+    --pillInactive: rgba(13,6,16,0.5);
+    --practiceBg: rgba(58,26,44,0.5);
+    --affBg: rgba(138,88,116,0.15);
+    --copyBg: rgba(138,88,116,0.45);
+    --completeBg: rgba(138,88,116,0.4);
+    --textareaBg: rgba(13,6,16,0.6);
+    --fallbackBg: rgba(58,26,44,0.4);
+    --progressTrack: rgba(245,234,240,0.06);
+    --tabBarBlur: blur(14px);
+  }
+
+  /* LIGHT THEME — cream / ivory editorial */
+  [data-theme="light"] {
+    --bg: #F5EBE0;
+    --bgMid: #EFE0D2;
+    --dark: #EFE3D5;
+    --mauveLt: #8A5874;
+    --mauve: #6B3F58;
+    --plum: #4A2238;
+    --plumDk: #2E1424;
+    --txt: #2A1820;
+    --txtSec: #4A2F3D;
+    --txtMuted: #6B4858;
+    --txtFaded: #8A6A7C;
+    --txtQuiet: #A88EA0;
+    --border: rgba(74,34,56,0.18);
+    --borderHv: rgba(74,34,56,0.38);
+    --shadow: rgba(74,34,56,0.18);
+    --gradMauve: linear-gradient(135deg, #4A2238 0%, #6B3F58 100%);
+    --gradDeep: linear-gradient(160deg, #EFE0D2 0%, #E5D1BD 50%, #D9BFA8 100%);
+    --stars: none;
+    --bgImageOpacity: 0;
+    --overlayGradient: linear-gradient(180deg, rgba(245,235,224,0.94) 0%, rgba(239,224,210,0.92) 50%, rgba(245,235,224,0.95) 100%);
+    --navBg: rgba(245,235,224,0.94);
+    --cardBg: rgba(255,250,244,0.85);
+    --pillInactive: rgba(255,250,244,0.6);
+    --practiceBg: rgba(255,250,244,0.9);
+    --affBg: rgba(217,191,168,0.35);
+    --copyBg: rgba(74,34,56,0.12);
+    --completeBg: rgba(74,34,56,0.1);
+    --textareaBg: rgba(255,250,244,0.85);
+    --fallbackBg: rgba(255,250,244,0.85);
+    --progressTrack: rgba(74,34,56,0.1);
+    --tabBarBlur: blur(14px);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { background: var(--bg); }
+  html, body { background: var(--bg); transition: background .4s ease; }
   body {
     font-family: 'Montserrat', sans-serif;
     color: var(--txtSec);
     min-height: 100vh;
     position: relative;
+    transition: color .4s ease;
   }
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
@@ -51,15 +112,20 @@
     position: fixed; inset: 0; z-index: 0;
     background-image: url("https://raw.githubusercontent.com/badassalchemy/imageassets/main/mainbackground1.jpg");
     background-size: cover; background-position: center; background-attachment: fixed;
+    opacity: var(--bgImageOpacity);
+    transition: opacity .4s ease;
   }
   .bg-overlay {
     position: fixed; inset: 0; z-index: 1;
-    background: linear-gradient(180deg, rgba(13,6,16,0.48) 0%, rgba(58,26,44,0.42) 50%, rgba(13,6,16,0.55) 100%);
+    background: var(--overlayGradient);
+    transition: background .4s ease;
   }
   .bg-stars {
     position: fixed; inset: 0; z-index: 2;
     background-image: var(--stars); pointer-events: none; opacity: 0.5;
+    transition: opacity .4s ease;
   }
+  [data-theme="light"] .bg-stars { opacity: 0; }
   .container {
     position: relative; z-index: 10;
     max-width: 680px; margin: 0 auto;
@@ -68,11 +134,46 @@
   /* Sticky tab nav */
   .tab-nav {
     position: sticky; top: 0; z-index: 100;
-    background: rgba(13,6,16,0.92);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+    background: var(--navBg);
+    backdrop-filter: var(--tabBarBlur);
+    -webkit-backdrop-filter: var(--tabBarBlur);
     border-bottom: 1px solid var(--border);
+    transition: background .3s ease;
   }
+  .nav-topbar {
+    display: flex; align-items: center; justify-content: flex-end;
+    padding: 10px 16px 0;
+  }
+  .theme-toggle {
+    background: var(--pillInactive);
+    border: 1px solid var(--border);
+    height: 38px;
+    padding: 0 14px 0 12px;
+    border-radius: 50px;
+    display: flex; align-items: center; gap: 8px;
+    cursor: pointer;
+    transition: all .25s ease;
+    color: var(--mauveLt);
+    font-family: 'Montserrat', sans-serif;
+    font-size: 10px; font-weight: 700; letter-spacing: 1.4px;
+    text-transform: uppercase;
+  }
+  .theme-toggle:hover {
+    border-color: var(--borderHv);
+    background: var(--copyBg);
+  }
+  .theme-toggle:hover svg {
+    transform: rotate(20deg);
+  }
+  .theme-toggle svg {
+    width: 16px; height: 16px;
+    transition: transform .25s ease;
+  }
+  .theme-toggle .icon-sun { display: none; }
+  .theme-toggle .icon-moon { display: block; }
+  [data-theme="light"] .theme-toggle .icon-sun { display: block; }
+  [data-theme="light"] .theme-toggle .icon-moon { display: none; }
+  .theme-toggle-label { white-space: nowrap; }
   .progress-strip {
     padding: 10px 20px 6px;
     display: flex; align-items: center; gap: 12px;
@@ -84,7 +185,7 @@
   }
   .progress-bar {
     flex: 1; height: 4px;
-    background: rgba(245,234,240,0.06);
+    background: var(--progressTrack);
     border-radius: 2px; overflow: hidden;
   }
   .progress-fill {
@@ -107,12 +208,12 @@
     text-transform: uppercase;
     padding: 11px 20px; border-radius: 50px;
     border: 1px solid var(--border);
-    background: rgba(13,6,16,0.5);
+    background: var(--pillInactive);
     color: var(--txtMuted);
     cursor: pointer;
     transition: all .2s ease;
   }
-  .tab-pill:hover { background: rgba(138,88,116,0.25); }
+  .tab-pill:hover { background: var(--copyBg); }
   .tab-pill.active {
     background: var(--gradMauve);
     border-color: var(--mauveLt);
@@ -182,14 +283,14 @@
 
   /* Session card */
   .session-card {
-    background: rgba(13,6,16,0.7);
+    background: var(--cardBg);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     border: 1px solid var(--border);
     border-radius: 14px;
     margin-bottom: 12px;
     overflow: hidden;
-    transition: border-color .25s ease, box-shadow .25s ease;
+    transition: border-color .25s ease, box-shadow .25s ease, background .3s ease;
     animation: fadeUp .5s ease both;
   }
   .session-card.complete { border-color: var(--mauveLt); }
@@ -225,6 +326,7 @@
   }
   .check svg { display: none; }
   .session-card.complete .check svg { display: block; }
+  .session-card .check svg path { stroke: var(--bg); transition: stroke .3s ease; }
   .chev { color: var(--txtFaded); font-size: 11px; transition: transform .2s; }
   .session-card.open .chev { transform: rotate(180deg); }
 
@@ -244,7 +346,7 @@
     color: var(--mauveLt); text-transform: uppercase; margin-bottom: 8px;
   }
   .practice-box {
-    background: rgba(58,26,44,0.5);
+    background: var(--practiceBg);
     border: 1px solid var(--border);
     border-radius: 10px;
     padding: 14px 16px;
@@ -252,7 +354,7 @@
     margin-bottom: 18px;
   }
   .aff-box {
-    background: rgba(138,88,116,0.15);
+    background: var(--affBg);
     border: 1px solid var(--border);
     border-radius: 10px;
     padding: 14px 16px;
@@ -269,7 +371,7 @@
     font-family: 'Montserrat', sans-serif;
     font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
     color: var(--txt);
-    background: rgba(138,88,116,0.45);
+    background: var(--copyBg);
     border: 1px solid var(--borderHv);
     padding: 8px 14px; border-radius: 50px;
     text-transform: uppercase; white-space: nowrap;
@@ -277,6 +379,7 @@
     transition: all .2s ease;
   }
   .copy-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(168,112,144,0.35); }
+  [data-theme="light"] .copy-btn { color: var(--mauve); }
 
   .prompt-row { margin-bottom: 18px; }
   .prompt-row:last-of-type { margin-bottom: 22px; }
@@ -289,7 +392,7 @@
     width: 100%;
     font-family: 'Montserrat', sans-serif;
     font-size: 15px; line-height: 1.6;
-    background: rgba(13,6,16,0.6);
+    background: var(--textareaBg);
     color: var(--txt);
     border: 1px solid var(--border);
     border-radius: 10px;
@@ -303,12 +406,13 @@
     font-family: 'Montserrat', sans-serif;
     font-size: 12px; font-weight: 700; letter-spacing: 1.5px;
     color: var(--txt);
-    background: rgba(138,88,116,0.4);
+    background: var(--completeBg);
     border: 1px solid var(--borderHv);
     padding: 14px 20px; border-radius: 50px;
     text-transform: uppercase; cursor: pointer;
     transition: all .2s ease;
   }
+  [data-theme="light"] .complete-btn { color: var(--mauve); }
   .complete-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(168,112,144,0.35); }
   .session-card.complete .complete-btn {
     color: var(--mauveLt); background: transparent; border-color: var(--mauveLt);
@@ -361,7 +465,7 @@
     display: inline-block;
     font-family: 'Montserrat', sans-serif;
     font-size: 14px; font-weight: 700; letter-spacing: 1.2px;
-    color: var(--txt);
+    color: #F5EAF0;
     background: var(--gradMauve);
     padding: 18px 38px; border-radius: 50px;
     border: none; text-decoration: none;
@@ -369,11 +473,13 @@
     box-shadow: 0 6px 20px var(--shadow);
     transition: all .2s ease;
   }
-  .cta-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(168,112,144,0.45); }
+  .cta-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(168,112,144,0.45); color: #F5EAF0; }
+  /* Active tab pill always has light text — it sits on the dark mauve gradient */
+  .tab-pill.active { color: #F5EAF0 !important; }
 
   /* Affirmations tab */
   .aff-row {
-    background: rgba(13,6,16,0.7);
+    background: var(--cardBg);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     border: 1px solid var(--border);
@@ -403,7 +509,7 @@
   @media (min-width: 520px) { .testimonial-grid { column-count: 2; } }
   @media (min-width: 900px) { .testimonial-grid { column-count: 3; } }
   .testimonial-card {
-    background: rgba(13,6,16,0.7);
+    background: var(--cardBg);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     border: 1px solid var(--border);
@@ -421,7 +527,7 @@
   .testimonial-fallback {
     padding: 20px 18px;
     border-radius: 10px;
-    background: rgba(58,26,44,0.4);
+    background: var(--fallbackBg);
     border: 1px solid var(--border);
   }
   .testimonial-fallback .err {
@@ -461,7 +567,7 @@
   .deeper-sub em { color: var(--mauveLt); }
 
   .deeper-narrative {
-    background: rgba(13,6,16,0.7);
+    background: var(--cardBg);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     border: 1px solid var(--border);
@@ -506,7 +612,7 @@
     margin-bottom: 14px; text-align: center;
   }
   .tool-card {
-    background: rgba(13,6,16,0.7);
+    background: var(--cardBg);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     border: 1px solid var(--border);
@@ -611,6 +717,25 @@
 
   <!-- TAB NAV -->
   <nav class="tab-nav">
+    <div class="nav-topbar">
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark mode" title="Toggle light/dark mode">
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="4"></circle>
+          <line x1="12" y1="2" x2="12" y2="4"></line>
+          <line x1="12" y1="20" x2="12" y2="22"></line>
+          <line x1="4.93" y1="4.93" x2="6.34" y2="6.34"></line>
+          <line x1="17.66" y1="17.66" x2="19.07" y2="19.07"></line>
+          <line x1="2" y1="12" x2="4" y2="12"></line>
+          <line x1="20" y1="12" x2="22" y2="12"></line>
+          <line x1="4.93" y1="19.07" x2="6.34" y2="17.66"></line>
+          <line x1="17.66" y1="6.34" x2="19.07" y2="4.93"></line>
+        </svg>
+        <span class="theme-toggle-label">Switch Modes</span>
+      </button>
+    </div>
     <div class="progress-strip" id="progressStrip">
       <span class="progress-label">Your Rewire</span>
       <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
@@ -792,6 +917,31 @@ const UPGRADES = [
   { mark:"✦", name:"The Identity Detox", desc:"A powerful 3-day subconscious reset designed to help you break emotional attachment to struggle, scarcity, and survival mode." },
   { mark:"✧", name:"Quantum Queen", desc:"Danielle's signature 90-day transformation experience for the woman ready to fully embody her wealthy, magnetic, emotionally regulated next identity." },
 ];
+
+// ── THEME MANAGEMENT ─────────────────────────────────────────
+const THEME_KEY = "rgir_theme";
+
+function applyTheme(theme) {
+  if (theme === "light") {
+    document.documentElement.setAttribute("data-theme", "light");
+  } else {
+    document.documentElement.removeAttribute("data-theme");
+  }
+}
+
+function loadTheme() {
+  try {
+    const saved = localStorage.getItem(THEME_KEY);
+    if (saved === "light") applyTheme("light");
+  } catch(e) { /* ignore */ }
+}
+
+function toggleTheme() {
+  const isLight = document.documentElement.getAttribute("data-theme") === "light";
+  const next = isLight ? "dark" : "light";
+  applyTheme(next);
+  try { localStorage.setItem(THEME_KEY, next); } catch(e) { /* ignore */ }
+}
 
 // ── STATE ────────────────────────────────────────────────────
 let state = {
@@ -1025,12 +1175,15 @@ document.addEventListener('input', (e) => {
 });
 
 // ── INIT ─────────────────────────────────────────────────────
+loadTheme();
 loadState();
 renderSessions();
 renderAffirmations();
 renderTestimonials();
 renderTools();
 updateProgress();
+
+document.getElementById('themeToggle').addEventListener('click', toggleTheme);
 
 </script>
 </body>
